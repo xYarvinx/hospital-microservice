@@ -8,6 +8,7 @@ public class HospitalMicroserviceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(HospitalMicroserviceApplication.class, args);
+
 	}
 
 }
