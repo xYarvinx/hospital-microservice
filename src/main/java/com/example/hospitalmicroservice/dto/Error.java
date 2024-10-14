@@ -1,9 +1,10 @@
 package com.example.hospitalmicroservice.dto;
 
+import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
+@Builder
 @Data
-public class Erorr {
+public class Error {
     private String message;
 }
