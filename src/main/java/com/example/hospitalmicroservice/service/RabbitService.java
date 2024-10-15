@@ -3,31 +3,32 @@ package com.example.hospitalmicroservice.service;
 
 import com.example.hospitalmicroservice.dto.TokenValidationRequest;
 import com.example.hospitalmicroservice.dto.TokenValidationResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class RabbitService {
     private final RabbitTemplate rabbitTemplate;
 
-    public RabbitService(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
 
-    public com.example.hospitalmicroservice.dto.TokenValidationResponse sendTokenValidationRequest(String token) {
-        String correlationId = UUID.randomUUID().toString();
+    public TokenValidationResponse sendTokenValidationRequest(String token) {
+        TokenValidationRequest request = new TokenValidationRequest(token, UUID.randomUUID().toString());
 
-
-        TokenValidationRequest request = new TokenValidationRequest(token, correlationId);
 
         rabbitTemplate.convertAndSend("authExchange", "auth.request", request);
-        Message message = rabbitTemplate.receive("authResponseQueue", 5000);
-        if (message != null) {
-            TokenValidationResponse response = (TokenValidationResponse) rabbitTemplate.getMessageConverter().fromMessage(message);
-            return response;
+
+
+        Message responseMessage = rabbitTemplate.receive("authResponseQueue", 5000);
+        if (responseMessage != null) {
+
+            return (TokenValidationResponse) rabbitTemplate.getMessageConverter()
+                    .fromMessage(responseMessage);
         } else {
             throw new RuntimeException("No response received within timeout period");
         }

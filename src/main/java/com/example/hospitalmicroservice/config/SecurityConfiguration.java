@@ -28,9 +28,11 @@ public class SecurityConfiguration {
                                 "/swagger-ui/**",
                                 "/swagger-resources/*",
                                 "/v3/api-docs/**",
-                                "/webjars/**",
-                                "/api/Hospitals/**")
-                        .permitAll()
+                                "/webjars/**"
+                                ).permitAll()
+                        .requestMatchers(
+                                "/api/Hospitals/**"
+                                ).authenticated()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint)

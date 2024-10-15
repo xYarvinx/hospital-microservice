@@ -19,7 +19,6 @@ public class HospitalController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @PreAuthorize("isAuthenticated()")
     private List<HosptialResponse> getHospitals(@RequestParam Integer from, @RequestParam Integer count) {
         return hospitalService.getHospitals(from, count);
     }
