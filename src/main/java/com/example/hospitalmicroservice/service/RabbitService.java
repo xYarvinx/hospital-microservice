@@ -34,4 +34,21 @@ public class RabbitService {
         }
     }
 
+    public TokenValidationResponse sendRoleValidationRequest(String token) {
+        TokenValidationRequest request = new TokenValidationRequest(token, UUID.randomUUID().toString());
+
+
+        rabbitTemplate.convertAndSend("roleExchange", "role.admin.request", request);
+
+
+        Message responseMessage = rabbitTemplate.receive("authResponseQueue", 5000);
+        if (responseMessage != null) {
+            return (TokenValidationResponse) rabbitTemplate.getMessageConverter()
+                    .fromMessage(responseMessage);
+        } else {
+            throw new RuntimeException("No response received within timeout period");
+        }
+    }
+
+
 }
