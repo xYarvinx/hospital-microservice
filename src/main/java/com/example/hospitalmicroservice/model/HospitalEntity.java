@@ -1,6 +1,7 @@
 package com.example.hospitalmicroservice.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -26,10 +27,11 @@ public class HospitalEntity {
 
     private String address;
 
+    @Pattern(regexp = "^[+]?[(]?[0-9]{3}[)]?[-\\s.]?[0-9]{3}[-\\s.]?[0-9]{4,6}$")
     private String contactNumber;
 
     private Set<String> rooms;
 
     @Column(nullable = false)
-    private Boolean deleted = Boolean.FALSE;
+    private boolean deleted = Boolean.FALSE;
 }

@@ -5,6 +5,7 @@ import com.example.hospitalmicroservice.dto.Error;
 import com.example.hospitalmicroservice.dto.ErrorResponse;
 import com.example.hospitalmicroservice.dto.TokenValidationResponse;
 import com.example.hospitalmicroservice.service.RabbitService;
+import com.example.hospitalmicroservice.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,7 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String token = extractToken(request);
+        final String token = JwtUtil.extractToken(request);
         if (token != null) {
             try {
                 TokenValidationResponse validationResponse = rabbitService.sendTokenValidationRequest(token);
@@ -60,11 +61,4 @@ public class JwtFilter extends OncePerRequestFilter {
         response.getWriter().write(jsonResponse);
     }
 
-    private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
 }
