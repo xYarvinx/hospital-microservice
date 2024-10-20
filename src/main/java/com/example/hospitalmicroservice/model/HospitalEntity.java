@@ -33,5 +33,5 @@ public class HospitalEntity {
     private Set<String> rooms;
 
     @Column(nullable = false)
-    private Boolean deleted = Boolean.FALSE;
+    private boolean deleted = Boolean.FALSE;
 }

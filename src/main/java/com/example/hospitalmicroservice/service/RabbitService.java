@@ -18,37 +18,32 @@ public class RabbitService {
 
 
     public TokenValidationResponse sendTokenValidationRequest(String token) {
-        TokenValidationRequest request = new TokenValidationRequest(token, UUID.randomUUID().toString());
+        String correlationId = UUID.randomUUID().toString();
+        TokenValidationRequest request = new TokenValidationRequest(token, correlationId);
 
-
-        rabbitTemplate.convertAndSend("authExchange", "auth.request", request);
-
+        rabbitTemplate.convertAndSend("authExchange", "auth.request." + correlationId, request);
 
         Message responseMessage = rabbitTemplate.receive("authResponseQueue", 5000);
         if (responseMessage != null) {
-
-            return (TokenValidationResponse) rabbitTemplate.getMessageConverter()
-                    .fromMessage(responseMessage);
+            return (TokenValidationResponse) rabbitTemplate.getMessageConverter().fromMessage(responseMessage);
         } else {
             throw new RuntimeException("No response received within timeout period");
         }
     }
+
 
     public TokenValidationResponse sendRoleValidationRequest(String token) {
-        TokenValidationRequest request = new TokenValidationRequest(token, UUID.randomUUID().toString());
+        String correlationId = UUID.randomUUID().toString();
+        TokenValidationRequest request = new TokenValidationRequest(token, correlationId);
 
+        rabbitTemplate.convertAndSend("roleExchange", "role.request." + correlationId, request);
 
-        rabbitTemplate.convertAndSend("roleExchange", "role.admin.request", request);
-
-
-        Message responseMessage = rabbitTemplate.receive("authResponseQueue", 5000);
+        Message responseMessage = rabbitTemplate.receive("roleResponseQueue", 5000);
         if (responseMessage != null) {
-            return (TokenValidationResponse) rabbitTemplate.getMessageConverter()
-                    .fromMessage(responseMessage);
+            return (TokenValidationResponse) rabbitTemplate.getMessageConverter().fromMessage(responseMessage);
         } else {
             throw new RuntimeException("No response received within timeout period");
         }
     }
-
 
 }

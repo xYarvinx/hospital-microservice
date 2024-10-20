@@ -28,21 +28,36 @@ public class HospitalController {
 
     @GetMapping("/{hospitalId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    private HospitalResponse getHospitalById(@PathVariable Long hospitalId){
+    private HospitalResponse getHospitalById(@PathVariable Long hospitalId) {
         return hospitalService.getHospital(hospitalId);
     }
 
     @GetMapping("/{hospitalId}/Rooms")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    private RoomsResponse getRoomsById(@PathVariable Long hospitalId){
+    private RoomsResponse getRoomsById(@PathVariable Long hospitalId) {
         return hospitalService.getRooms(hospitalId);
     }
 
+
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    private MessageResponse createHospital(@RequestBody HospitalRequest request, @RequestHeader HttpServletRequest headear ){
-        hospitalService.createHospital(request, headear);
-        return null;
+    private MessageResponse createHospital(@RequestBody HospitalRequest request, @RequestHeader("Authorization") String token) {
+        hospitalService.createHospital(request, token);
+
+        return new MessageResponse("Больница успешно добавлена");
     }
 
+    @PutMapping("/{hospitalId}")
+    @ResponseStatus(HttpStatus.OK)
+    private MessageResponse updateHospital(@PathVariable Long hospitalId, @RequestBody HospitalRequest request, @RequestHeader("Authorization") String token) {
+        hospitalService.updateHosptial(hospitalId, request, token);
+        return new MessageResponse("Данные больницы успешно обновленны");
+    }
+
+    @DeleteMapping("/{hospitalId}")
+    @ResponseStatus(HttpStatus.OK)
+    private MessageResponse deleteHospital(@PathVariable Long hospitalId, @RequestHeader("Authorization") String token) {
+        hospitalService.deleteById(hospitalId, token);
+        return new MessageResponse("Больница успешно удалена");
+    }
 }

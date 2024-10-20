@@ -4,12 +4,12 @@ import com.example.hospitalmicroservice.dto.HospitalRequest;
 import com.example.hospitalmicroservice.dto.HospitalResponse;
 import com.example.hospitalmicroservice.dto.RoomsResponse;
 import com.example.hospitalmicroservice.dto.TokenValidationResponse;
+import com.example.hospitalmicroservice.exception.HospitalExistException;
 import com.example.hospitalmicroservice.exception.HospitalNotFoundException;
 import com.example.hospitalmicroservice.exception.InvalidDataException;
 import com.example.hospitalmicroservice.model.HospitalEntity;
 import com.example.hospitalmicroservice.repository.HospitalRepository;
-import com.example.hospitalmicroservice.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -72,15 +72,63 @@ public class HospitalService {
                 .build();
     }
 
-    private boolean isAdmin(HttpServletRequest header){
-        TokenValidationResponse response = rabbitService.sendRoleValidationRequest(JwtUtil.extractToken(header));
+    private boolean isAdmin(String token){
+        TokenValidationResponse response = rabbitService.sendRoleValidationRequest(token.substring(7));
         return response.isValid();
     }
 
-    public void createHospital(HospitalRequest request, HttpServletRequest header){
-        if(!isAdmin(header)){
+    public void createHospital(HospitalRequest request, String token){
+        if(!isAdmin(token)){
             throw new InvalidDataException("Token is expired or invalid");
         }
-        //TODO: Доделать создание госпиталя
+
+        if (hospitalRepository.existsByName(request.getName())) {
+            throw new HospitalExistException("Больница с таким названием уже существует.");
+        }
+
+        try {
+            HospitalEntity hospital =  HospitalEntity.builder()
+                    .address(request.getAddress())
+                    .name(request.getName())
+                    .contactNumber(request.getContactPhone())
+                    .rooms(request.getRooms())
+                    .build();
+
+            hospitalRepository.save(hospital);
+        } catch (Exception e) {
+            throw new InvalidDataException("Ошибка в данных");
+        }
+    }
+
+    @Transactional
+    public void updateHosptial(Long hospitalId, HospitalRequest request, String token){
+        if(!isAdmin(token)){
+            throw new InvalidDataException("Invalid or expired token");
+        }
+
+        HospitalEntity hospital = getHospitalById(hospitalId);
+        if (!hospital.getName().equals(request.getName()) && hospitalRepository.existsByName(request.getName())) {
+            throw new HospitalExistException("Больница с таким названием уже существует.");
+        }
+
+        try {
+            hospital.setAddress(request.getAddress());
+            hospital.setName(request.getName());
+            hospital.setContactNumber(request.getContactPhone());
+            hospital.setRooms(request.getRooms());
+
+        } catch (Exception e) {
+            throw new InvalidDataException("Ошибка в данных");
+        }
+
+    }
+
+    public void deleteById(Long hospitalId, String token) {
+        if(!isAdmin(token)){
+            throw new InvalidDataException("Invalid or expired token");
+        }
+
+        HospitalEntity hospital = getHospitalById(hospitalId);
+        hospitalRepository.delete(hospital);
     }
 }
