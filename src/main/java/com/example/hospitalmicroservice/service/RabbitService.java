@@ -6,7 +6,6 @@ import com.example.hospitalmicroservice.dto.TokenValidationResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

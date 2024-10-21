@@ -6,7 +6,6 @@ import com.example.hospitalmicroservice.dto.MessageResponse;
 import com.example.hospitalmicroservice.dto.RoomsResponse;
 import com.example.hospitalmicroservice.exception.ControllerExceptionHandler;
 import com.example.hospitalmicroservice.service.HospitalService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
