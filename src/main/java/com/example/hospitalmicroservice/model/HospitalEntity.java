@@ -27,8 +27,7 @@ public class HospitalEntity {
 
     private String address;
 
-    @Pattern(regexp = "^[+]?[(]?[0-9]{3}[)]?[-\\s.]?[0-9]{3}[-\\s.]?[0-9]{4,6}$")
-    private String contactNumber;
+    private String contactPhone;
 
     private Set<String> rooms;
 

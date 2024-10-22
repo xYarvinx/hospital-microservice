@@ -11,6 +11,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -26,9 +28,10 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swagger-ui/**",
-                                "/swagger-resources/*",
+                                "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/webjars/**"
+                                "/swagger-config.yaml",
+                                "/swagger-ui.html/swagger-config.yaml"
                                 ).permitAll()
                         .requestMatchers(
                                 "/api/Hospitals/**"

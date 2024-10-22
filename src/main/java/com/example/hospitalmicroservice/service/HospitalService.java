@@ -36,7 +36,7 @@ public class HospitalService {
                 .map(hospital -> HospitalResponse.builder()
                         .id(hospital.getId())
                         .address(hospital.getAddress())
-                        .contactNumber(hospital.getContactNumber())
+                        .contactPhone(hospital.getContactPhone())
                         .name(hospital.getName())
                         .build())
                 .collect(Collectors.toList());
@@ -58,7 +58,7 @@ public class HospitalService {
 
         return HospitalResponse.builder()
                 .address(hospital.getAddress())
-                .contactNumber(hospital.getContactNumber())
+                .contactPhone(hospital.getContactPhone())
                 .name(hospital.getName())
                 .build();
     }
@@ -90,7 +90,7 @@ public class HospitalService {
             HospitalEntity hospital =  HospitalEntity.builder()
                     .address(request.getAddress())
                     .name(request.getName())
-                    .contactNumber(request.getContactPhone())
+                    .contactPhone(request.getContactPhone())
                     .rooms(request.getRooms())
                     .build();
 
@@ -114,7 +114,7 @@ public class HospitalService {
         try {
             hospital.setAddress(request.getAddress());
             hospital.setName(request.getName());
-            hospital.setContactNumber(request.getContactPhone());
+            hospital.setContactPhone(request.getContactPhone());
             hospital.setRooms(request.getRooms());
 
         } catch (Exception e) {
