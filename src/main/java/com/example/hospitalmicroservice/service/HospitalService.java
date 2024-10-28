@@ -1,19 +1,20 @@
 package com.example.hospitalmicroservice.service;
 
-import com.example.hospitalmicroservice.dto.HospitalRequest;
-import com.example.hospitalmicroservice.dto.HospitalResponse;
-import com.example.hospitalmicroservice.dto.RoomsResponse;
-import com.example.hospitalmicroservice.dto.TokenValidationResponse;
+import com.example.hospitalmicroservice.dto.*;
 import com.example.hospitalmicroservice.exception.HospitalExistException;
 import com.example.hospitalmicroservice.exception.HospitalNotFoundException;
 import com.example.hospitalmicroservice.exception.InvalidDataException;
+import com.example.hospitalmicroservice.exception.InvalidTokenException;
 import com.example.hospitalmicroservice.model.HospitalEntity;
 import com.example.hospitalmicroservice.repository.HospitalRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,14 +73,14 @@ public class HospitalService {
                 .build();
     }
 
-    private boolean isAdmin(String token){
-        TokenValidationResponse response = rabbitService.sendRoleValidationRequest(token.substring(7));
+    private boolean isAllow(String token, List<String> roles){
+        RoleValidationResponse response = rabbitService.sendRoleValidationRequest(token.substring(7), roles);
         return response.isValid();
     }
 
     public void createHospital(HospitalRequest request, String token){
-        if(!isAdmin(token)){
-            throw new InvalidDataException("Token is expired or invalid");
+        if(!isAllow(token, List.of("ADMIN"))){
+            throw new InvalidTokenException("Invalid or expired token");
         }
 
         if (hospitalRepository.existsByName(request.getName())) {
@@ -102,7 +103,7 @@ public class HospitalService {
 
     @Transactional
     public void updateHosptial(Long hospitalId, HospitalRequest request, String token){
-        if(!isAdmin(token)){
+        if(!isAllow(token, List.of("ADMIN"))){
             throw new InvalidDataException("Invalid or expired token");
         }
 
@@ -124,11 +125,25 @@ public class HospitalService {
     }
 
     public void deleteById(Long hospitalId, String token) {
-        if(!isAdmin(token)){
+        if(!isAllow(token, List.of("ADMIN"))){
             throw new InvalidDataException("Invalid or expired token");
         }
 
         HospitalEntity hospital = getHospitalById(hospitalId);
         hospitalRepository.delete(hospital);
+    }
+
+    @RabbitListener(queues = "hospitalExistenceRequestQueue")
+    public Boolean handleHospitalExistenceRequest(Long hospitalId) {
+        return hospitalRepository.existsById(hospitalId);
+    }
+
+    @RabbitListener(queues = "roomExistRequestQueue")
+    public boolean handleRoomExistenceRequest(Map<String, Object> message) {
+        Long hospitalId = ((Number) message.get("hospitalId")).longValue();
+        String room = (String) message.get("room");
+        HospitalEntity hospital = getHospitalById(hospitalId);
+
+        return hospital.getRooms().contains(room);
     }
 }
